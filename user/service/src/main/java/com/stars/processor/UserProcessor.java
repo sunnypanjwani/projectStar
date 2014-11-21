@@ -1,6 +1,8 @@
 package com.stars.processor;
+import java.util.List;
 import java.util.logging.Logger;
 
+import com.stars.exception.InvalidSubscriptionException;
 import com.stars.persistence.dao.*;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
@@ -47,6 +49,17 @@ public class UserProcessor{
 			log.info("Saving user");
 			
 			return user;
+		}
+
+		public void validateUserSubscription(String screenName, String email) throws InvalidSubscriptionException, Exception{
+			log.info("Fetching user with screen Name: " +screenName + " and email: " +email);
+			List<Users> users = Users.loadUserByScreenNameOrEmail(screenName, email);
+			if(users.size() > 0){
+				log.info("User found with screen Name: " +screenName + " and email: " +email +". Subscription Invalid.");
+				throw new InvalidSubscriptionException("User Id or Email already in use");
+			}
+			log.info("No user found with screen Name: " +screenName + " and email: " +email +". Subscription Valid.");
+			
 		}
 }
 

@@ -198,6 +198,21 @@ public class Users implements java.io.Serializable {
 		return list.get(0);
 	}
 	
+	public static List<Users> loadUserByScreenNameOrEmail(String screenName,
+			String email) {
+		
+		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance().getPersistenceManager();
+		Query query = persistMgr.getSession().createSQLQuery("(select * from users where screen_name = :screenName) "
+				+ "union (select * from users where email = :email)").addEntity(Users.class);
+		query.setParameter("screenName", screenName);
+		query.setParameter("email", email);
+		
+		@SuppressWarnings("unchecked")
+		List<Users> list = query.list();
+		
+		return list;
+	}
+	
 	public static Users loadUserByScreenName(String screenName) throws Exception {
 
 		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance().getPersistenceManager();
@@ -216,4 +231,6 @@ public class Users implements java.io.Serializable {
 
 		return list.get(0);
 	}
+
+	
 }

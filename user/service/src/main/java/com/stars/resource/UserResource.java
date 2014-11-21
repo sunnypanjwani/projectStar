@@ -3,10 +3,13 @@ package com.stars.resource;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import com.stars.exception.InvalidSubscriptionException;
 import com.stars.persistence.dbaccess.PersistenceManager;
 import com.stars.persistence.dbaccess.PersistenceManagerFactory;
 import com.stars.processor.UserProcessor;
@@ -43,7 +46,22 @@ public class UserResource {
 				persist.commitTransaction();
 				persist.cleanUp();
 			}
+		}		
+	}
+	
+	@GET
+	@Path("/isSubscriptionValid")
+	@Consumes({ "application/xml", "application/json" })
+	public Response isSubscriptionValid(@QueryParam("screenname") String screenName, @QueryParam("email") String email){
+		log.info("Got Request for subscription validation. Screen Name: " +screenName + " and email: " +email);
+		try{
+			UserProcessor process = new UserProcessor();
+			process.validateUserSubscription(screenName, email);    		
+			return Response.status(Response.Status.OK).type(WS_RETURN_TYPE_JSON).build();
+		}catch(InvalidSubscriptionException ex){			
+			return Response.status(Response.Status.CONFLICT).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
+		}catch(Exception ex){
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(WS_RETURN_TYPE_JSON).build();
 		}
-		
 	}
 }
