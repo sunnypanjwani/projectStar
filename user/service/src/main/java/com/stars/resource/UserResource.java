@@ -15,6 +15,7 @@ import com.stars.persistence.dbaccess.PersistenceManagerFactory;
 import com.stars.processor.UserProcessor;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
+import com.stars.request_response.GetUserResponse;
 
 @Path("/stars")
 public class UserResource {
@@ -62,6 +63,49 @@ public class UserResource {
 			return Response.status(Response.Status.CONFLICT).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
 		}catch(Exception ex){
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(WS_RETURN_TYPE_JSON).build();
+		}
+	}
+	
+	@GET
+	@Path("/getUserByScreenName")
+	@Consumes({ "application/xml", "application/json" })
+	public Response getUserByScreenName(@QueryParam("screenname") String screenName){
+		log.info("GetUser request for screen Name: " +screenName);
+		try{
+			UserProcessor process = new UserProcessor();
+			GetUserResponse response = process.getUserByScreenName(screenName);    		
+			return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
+		}catch(Exception ex){
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
+		}
+	}
+	
+	@GET
+	@Path("/getUserByEmail")
+	@Consumes({ "application/xml", "application/json" })
+	public Response getUserByEmail(@QueryParam("email") String email){
+		log.info("GetUser request for email: " +email);
+		try{
+			UserProcessor process = new UserProcessor();
+			GetUserResponse response = process.getUserByEmail(email);    		
+			return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
+		}catch(Exception ex){
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
+		}
+	}
+	
+	@GET
+	@Path("/getUser")
+	@Consumes({ "application/xml", "application/json" })
+	public Response getUser(@QueryParam("screenname") String screenName,
+			@QueryParam("email") String email){
+		log.info("GetUser request for screen Name: " +screenName + " and email: " +email);
+		try{
+			UserProcessor process = new UserProcessor();
+			GetUserResponse response = process.getUser(screenName, email);    		
+			return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
+		}catch(Exception ex){
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
 		}
 	}
 }

@@ -6,7 +6,7 @@ import com.stars.exception.InvalidSubscriptionException;
 import com.stars.persistence.dao.*;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
-
+import com.stars.request_response.GetUserResponse;
 
 public class UserProcessor{
         private static Logger log = Logger.getLogger(UserProcessor.class.getName());
@@ -60,6 +60,60 @@ public class UserProcessor{
 			}
 			log.info("No user found with screen Name: " +screenName + " and email: " +email +". Subscription Valid.");
 			
+		}
+
+		public GetUserResponse getUserByScreenName(String screenName) throws Exception {
+			List<Users> user = Users.loadUserByScreenNameOrEmail(screenName, null);
+			
+			if(user.size() != 1){
+				throw new Exception("Error. One user expected with screenName: " +screenName +", Found more or less.");
+			}
+			
+			GetUserResponse response = getUserResponseFromUserDao(user.get(0));
+			return response;
+		}
+
+		private GetUserResponse getUserResponseFromUserDao(Users user) {
+			GetUserResponse responseObj = new GetUserResponse();
+			
+			responseObj.setUserId(user.getUserId());
+			responseObj.setScreenName(user.getScreenName());
+			responseObj.setFirstName(user.getFirstName());
+			responseObj.setLastName(user.getLastName());
+			responseObj.setEmail(user.getEmail());
+			responseObj.setAddressLine1(user.getAddressLine1());
+			responseObj.setAddressLine2(user.getAddressLine2());
+			responseObj.setAddressLine3(user.getAddressLine3());
+			responseObj.setAddressCity(user.getCity());
+			responseObj.setAddressState(user.getState());
+			responseObj.setAddressCountry(user.getCountry());
+			responseObj.setAddressZip(user.getZip());
+			
+			return responseObj;
+		}
+
+		public GetUserResponse getUserByEmail(String email) throws Exception {
+			List<Users> user = Users.loadUserByScreenNameOrEmail(null, email);
+			
+			if(user.size() != 1){
+				throw new Exception("Error. One user expected with email: " + email +", Found more or less.");
+			}
+			
+			GetUserResponse response = getUserResponseFromUserDao(user.get(0));
+			return response;
+		}
+
+		public GetUserResponse getUser(String screenName, String email) throws Exception {
+			GetUserResponse responseObj = null;
+			
+			if(screenName != null){
+				responseObj = getUserByScreenName(screenName);
+			}else if(email != null){
+				responseObj = getUserByEmail(email);
+			}else{
+				throw new Exception("Atleast one, screenName or email required for getUser");
+			}
+			return responseObj;
 		}
 }
 
