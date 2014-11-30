@@ -11,7 +11,13 @@ import com.stars.request_response.ValidateUserResponse;
 import com.stars.request_response.ValidateUserRequest;
 
 public class UserProcessor{
-    private static Logger log = Logger.getLogger(UserProcessor.class.getName());
+    private static final String MSG_VALID = "Valid";
+	private static final String MSG_INVALID = "Invalid";
+	private static final String CODE_ERR = "ERR";
+	private static final String CODE_OK = "OK";
+	private static final String PASSWORD_SALT = "salt";
+	private static Logger log = Logger.getLogger(UserProcessor.class.getName());
+    private static final String CHANGE_NOT_REQUIRED = "N";
     
     public UserProcessor(){
     }
@@ -34,8 +40,8 @@ public class UserProcessor{
 		Passwords password = new Passwords();
 		password.setUser(user);
 		password.setPasswordHash(request.getPassword());
-		password.setPasswordSalt("salt");
-		
+		password.setPasswordSalt(PASSWORD_SALT);
+		password.setChangeRequired(CHANGE_NOT_REQUIRED);
 		password.save();		
 	}
 
@@ -132,11 +138,11 @@ public class UserProcessor{
 		log.info("Got password with id: " +password.getPasswordId());
 		String decryptedPassword = getDecryptedPassword(password.getPasswordHash());
 		if(decryptedPassword.equals(request.getPassword())){
-			response.setCode("OK");
-			response.setMessage("Valid");
+			response.setCode(CODE_OK);
+			response.setMessage(MSG_VALID);
 		}else{
-			response.setCode("ERR");
-			response.setMessage("Invalid");
+			response.setCode(CODE_ERR);
+			response.setMessage(MSG_INVALID);
 		}
 		
 		return response;
