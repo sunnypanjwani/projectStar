@@ -7,13 +7,9 @@ import java.util.logging.Logger;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NoResultException;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -25,11 +21,11 @@ import com.stars.persistence.dbaccess.PersistenceManagerFactory;
 @Entity
 @Cacheable(false)
 @Table(name = "users")
-public class Users implements java.io.Serializable {
-	
+public class Users implements java.io.Serializable {	
 	private static Logger logger = Logger.getLogger(Users.class.getName());
 	private static final long serialVersionUID = 1454644747L;
-	private Integer userId;
+	
+	private long userId;
 	private String screenName;
 	private Date created;
 	private Date modified;
@@ -43,20 +39,18 @@ public class Users implements java.io.Serializable {
 	private String addressState;
 	private String addressCountry;
 	private String addressZip;
-
-	public Users() {
+	
+	public Users(){
+		
 	}
-
+	
 	@Id
-	@GeneratedValue
-	@Column(name = "user_id", unique = true, nullable = false)
-	//@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_SEQ")
-	//@SequenceGenerator(name = "USER_SEQ", sequenceName = "USERS_SEQ", allocationSize = 1)
-	public Integer getUserId() {
+	@Column(name = "user_id")
+	public long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(Integer userId) {
+	public void setUserId(long userId) {
 		this.userId = userId;
 	}
 
@@ -122,7 +116,7 @@ public class Users implements java.io.Serializable {
 	public void setAddressLine3(String addressLine3) {
 		this.addressLine3 = addressLine3;
 	}
-
+	
 	@Column(name = "address_city")
 	public String getCity() {
 		return addressCity;
@@ -164,94 +158,79 @@ public class Users implements java.io.Serializable {
 	public Date getCreated() {
 		return created;
 	}
-
+	
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-
+	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "modified")
 	public Date getModified() {
 		return modified;
 	}
-
+	
 	public void setModified(Date modified) {
 		this.modified = modified;
 	}
 
-	public void save() throws Exception {
+	public void save() throws Exception
+	{
 		this.setModified(new Date());
-		PersistenceManagerFactory.getInstance().getPersistenceManager()
-				.saveOrUpdate(this);
+		PersistenceManagerFactory.getInstance().getPersistenceManager().saveOrUpdate(this);
 	}
-
+	
 	public static Users loadUserByUserId(Long userId) throws Exception {
 
-		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance()
-				.getPersistenceManager();
+		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance().getPersistenceManager();
 
-		Query query = persistMgr.getSession()
-				.createSQLQuery("select * from users where user_id = :userId")
-				.addEntity(Users.class);
+		Query query = persistMgr.getSession().createSQLQuery("select * from users where user_id = :userId").addEntity(Users.class);
 		query.setParameter("userId", userId);
 		logger.info("Executing Query : " + query.getQueryString());
 
 		@SuppressWarnings("unchecked")
 		List<Users> list = query.list();
 
-		if (list == null || list.size() != 1) {
+		if (list == null || list.size() != 1){
 
-			throw new NoResultException(
-					"No result found in users for userId:  " + userId);
+			throw new NoResultException("No result found in users for userId:  " + userId);
 		}
 
 		return list.get(0);
 	}
-
+	
 	public static List<Users> loadUserByScreenNameOrEmail(String screenName,
 			String email) {
-
-		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance()
-				.getPersistenceManager();
-		Query query = persistMgr
-				.getSession()
-				.createSQLQuery(
-						"(select * from users where screen_name = :screenName) "
-								+ "union (select * from users where email = :email)")
-				.addEntity(Users.class);
+		
+		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance().getPersistenceManager();
+		Query query = persistMgr.getSession().createSQLQuery("(select * from users where screen_name = :screenName) "
+				+ "union (select * from users where email = :email)").addEntity(Users.class);
 		query.setParameter("screenName", screenName);
 		query.setParameter("email", email);
-
+		
 		@SuppressWarnings("unchecked")
 		List<Users> list = query.list();
-
+		
 		return list;
 	}
+	
+	public static Users loadUserByScreenName(String screenName) throws Exception {
 
-	public static Users loadUserByScreenName(String screenName)
-			throws Exception {
+		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance().getPersistenceManager();
 
-		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance()
-				.getPersistenceManager();
-
-		Query query = persistMgr
-				.getSession()
-				.createSQLQuery(
-						"select * from users where screen_name = :screenName")
-				.addEntity(Users.class);
+		Query query = persistMgr.getSession().createSQLQuery("select * from users where screen_name = :screenName").addEntity(Users.class);
 		query.setParameter("screenName", screenName);
 		logger.info("Executing Query : " + query.getQueryString());
 
 		@SuppressWarnings("unchecked")
 		List<Users> list = query.list();
 
-		if (list == null || list.size() != 1) {
+		if (list == null || list.size() != 1){
 
-			throw new NoResultException(
-					"No result found in users for screenName:  " + screenName);
+			throw new NoResultException("No result found in users for screenName:  " + screenName);
 		}
 
 		return list.get(0);
 	}
 
+	
 }

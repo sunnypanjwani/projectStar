@@ -8,7 +8,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.*;
-
+import com.stars.persistence.dbaccess.PersistenceManager;
 import java.util.logging.Logger;
 
 
