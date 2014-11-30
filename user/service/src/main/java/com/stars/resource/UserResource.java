@@ -42,6 +42,7 @@ public class UserResource {
     		
 			return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
 		}catch(Exception ex){
+			ex.printStackTrace();
 			persist.rollbackTransaction();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(WS_RETURN_TYPE_JSON).build();
 		}finally {

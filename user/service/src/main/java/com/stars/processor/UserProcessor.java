@@ -19,20 +19,25 @@ public class UserProcessor{
     public AddUserResponse processAddRequest(AddUserRequest request) throws Exception{
     	AddUserResponse response = new AddUserResponse();
     	
-    	try{
-    		Users user = createUser(request);
-    		user.save();
-    		log.info("User Created successfully with userId: " +user.getUserId());
-    	}
-    	catch (Exception e) {
-    		e.printStackTrace();
-    		throw e;
-    	}
-        
-    	response.setMessage("User Created Successfully");
+    	Users user = createUser(request);
+		user.save();
+		log.info("User Created successfully with userId: " +user.getUserId());
+		createPasswordEntry(user, request);
+		
+		response.setMessage("User Created Successfully");
     	
     	return response;
     }
+
+	private void createPasswordEntry(Users user, AddUserRequest request) throws Exception{
+		log.info("Creating password for user: " +user.getUserId());
+		Passwords password = new Passwords();
+		password.setUser(user);
+		password.setPasswordHash(request.getPassword());
+		password.setPasswordSalt("salt");
+		
+		password.save();		
+	}
 
 	private Users createUser(AddUserRequest request) throws Exception {
 		Users user = new Users();

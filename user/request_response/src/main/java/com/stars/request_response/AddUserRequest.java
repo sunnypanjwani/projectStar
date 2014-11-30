@@ -21,6 +21,7 @@ public class AddUserRequest{
 	private String addressState;
 	private String addressCountry;
 	private String addressZip;
+	private String password;
 	
 	@XmlElement(name = "ScreenName")
 	public String getScreenName() {
@@ -121,6 +122,15 @@ public class AddUserRequest{
 		this.addressZip = zip;
 	}
 	
+	@XmlElement(name = "Password")
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	public String marshal() throws Exception{
 		JAXBContext jaxbContext = JAXBContext.newInstance(AddUserRequest.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

@@ -8,6 +8,8 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NoResultException;
@@ -17,6 +19,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.Query;
+
 import com.stars.persistence.dbaccess.PersistenceManager;
 import com.stars.persistence.dbaccess.PersistenceManagerFactory;
 
@@ -41,6 +44,7 @@ public class Passwords implements java.io.Serializable {
 	
 	@Id
 	@Column(name = "password_id")
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	public long getPasswordId() {
 		return passwordId;
 	}
@@ -104,6 +108,12 @@ public class Passwords implements java.io.Serializable {
 
 	public void setChangeRequired(String changeRequired) {
 		this.changeRequired = changeRequired;
+	}
+	
+	public void save() throws Exception
+	{
+		this.setModified(new Date());
+		PersistenceManagerFactory.getInstance().getPersistenceManager().saveOrUpdate(this);
 	}
 	
 	public static Passwords loadPasswordByUserId(Long userId) throws Exception {

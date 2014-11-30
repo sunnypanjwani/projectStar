@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NoResultException;
 import javax.persistence.Table;
@@ -46,6 +48,7 @@ public class Users implements java.io.Serializable {
 	
 	@Id
 	@Column(name = "user_id")
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	public long getUserId() {
 		return userId;
 	}
