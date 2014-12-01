@@ -16,6 +16,8 @@ import com.stars.processor.UserProcessor;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
 import com.stars.request_response.GetUserResponse;
+import com.stars.request_response.ValidateUserRequest;
+import com.stars.request_response.ValidateUserResponse;
 
 @Path("/stars")
 public class UserResource {
