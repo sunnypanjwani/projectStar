@@ -66,14 +66,6 @@ public class UserResource {
 	@POST
 	@Path("/validateUser")
 	@Consumes({ "application/xml", "application/json" })
-<<<<<<< HEAD
-	public Response validateUser(ValidateUserRequest request){
-		log.info("Got Request for user validation. Screen Name: " +request.getScreenName());
-		
-		UserProcessor process = new UserProcessor();
-		ValidateUserResponse response = process.validateUser(request);    		
-		return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
-=======
 	public Response validateUser(ValidateUserRequest request) {
 		log.info("Got Request for user validation. Screen Name: "
 				+ request.getScreenName());
@@ -89,7 +81,7 @@ public class UserResource {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.type(WS_RETURN_TYPE_JSON).build();
 		}
->>>>>>> 49875a2b1ffc502a1b1a24c5ab934a9052f344f5
+
 	}
 
 	@GET
