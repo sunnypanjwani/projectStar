@@ -27,7 +27,7 @@ public class Users implements java.io.Serializable {
 	private static Logger logger = Logger.getLogger(Users.class.getName());
 	private static final long serialVersionUID = 1454644747L;
 	
-	private long userId;
+	private Long userId;
 	private String screenName;
 	private Date created;
 	private Date modified;
@@ -36,18 +36,17 @@ public class Users implements java.io.Serializable {
 	private String email;
 	private String sex;
 	
-	public Users(){
-		
+	public Users(){	
 	}
 	
 	@Id
 	@Column(name = "user_id")
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	public long getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
-
-	public void setUserId(long userId) {
+	
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 
