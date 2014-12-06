@@ -34,13 +34,7 @@ public class Users implements java.io.Serializable {
 	private String firstName;
 	private String lastName;
 	private String email;
-	private String addressLine1;
-	private String addressLine2;
-	private String addressLine3;
-	private String addressCity;
-	private String addressState;
-	private String addressCountry;
-	private String addressZip;
+	private String sex;
 	
 	public Users(){
 		
@@ -93,69 +87,6 @@ public class Users implements java.io.Serializable {
 		this.email = email;
 	}
 
-	@Column(name = "address_line_1")
-	public String getAddressLine1() {
-		return addressLine1;
-	}
-
-	public void setAddressLine1(String addressLine1) {
-		this.addressLine1 = addressLine1;
-	}
-
-	@Column(name = "address_line_2")
-	public String getAddressLine2() {
-		return addressLine2;
-	}
-
-	public void setAddressLine2(String addressLine2) {
-		this.addressLine2 = addressLine2;
-	}
-
-	@Column(name = "address_line_3")
-	public String getAddressLine3() {
-		return addressLine3;
-	}
-
-	public void setAddressLine3(String addressLine3) {
-		this.addressLine3 = addressLine3;
-	}
-	
-	@Column(name = "address_city")
-	public String getCity() {
-		return addressCity;
-	}
-
-	public void setCity(String city) {
-		this.addressCity = city;
-	}
-
-	@Column(name = "address_state")
-	public String getState() {
-		return addressState;
-	}
-
-	public void setState(String state) {
-		this.addressState = state;
-	}
-
-	@Column(name = "address_country")
-	public String getCountry() {
-		return addressCountry;
-	}
-
-	public void setCountry(String country) {
-		this.addressCountry = country;
-	}
-
-	@Column(name = "address_zip")
-	public String getZip() {
-		return addressZip;
-	}
-
-	public void setZip(String zip) {
-		this.addressZip = zip;
-	}
-
 	@Temporal(TemporalType.DATE)
 	@Column(name = "created")
 	public Date getCreated() {
@@ -174,6 +105,15 @@ public class Users implements java.io.Serializable {
 	
 	public void setModified(Date modified) {
 		this.modified = modified;
+	}
+	
+	@Column(name = "sex")
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
 	}
 
 	public void save() throws Exception

@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ValidateUserResponse{
 	private String code;
 	private String message;
+	private boolean changeRequired;
 	
 	@XmlElement(name = "code")
 	public String getCode() {
@@ -22,5 +23,13 @@ public class ValidateUserResponse{
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	
+	@XmlElement(name = "changeRequired")
+	public boolean getChangeRequired() {
+		return changeRequired;
+	}
+	public void setChangeRequired(boolean changeRequired) {
+		this.changeRequired = changeRequired;
 	}
 }

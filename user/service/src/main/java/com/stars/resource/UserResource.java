@@ -2,6 +2,7 @@ package com.stars.resource;
 
 import java.util.logging.Logger;
 
+import javax.persistence.NoResultException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -15,9 +16,11 @@ import com.stars.persistence.dbaccess.PersistenceManagerFactory;
 import com.stars.processor.UserProcessor;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
+import com.stars.request_response.ChangePasswordRequest;
 import com.stars.request_response.GetUserResponse;
 import com.stars.request_response.ValidateUserRequest;
 import com.stars.request_response.ValidateUserResponse;
+import com.stars.request_response.GenerateTemporaryPasswordRequest;
 
 @Path("/stars")
 public class UserResource {
@@ -58,15 +61,10 @@ public class UserResource {
 	@Consumes({ "application/xml", "application/json" })
 	public Response validateUser(ValidateUserRequest request){
 		log.info("Got Request for user validation. Screen Name: " +request.getScreenName());
-		try{
-			UserProcessor process = new UserProcessor();
-			ValidateUserResponse response = process.validateUser(request);    		
-			return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
-		}catch(Exception ex){
-			log.info("Exception while executing validateUser: " +ex.getMessage());
-			ex.printStackTrace();
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(WS_RETURN_TYPE_JSON).build();
-		}
+		
+		UserProcessor process = new UserProcessor();
+		ValidateUserResponse response = process.validateUser(request);    		
+		return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
 	}
 	
 	@GET
@@ -125,6 +123,68 @@ public class UserResource {
 			return Response.status(Response.Status.OK).entity(response).type(WS_RETURN_TYPE_JSON).build();
 		}catch(Exception ex){
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
+		}
+	}
+	
+	@POST
+	@Path("/generateTemporaryPassword")
+	@Consumes({ "application/xml", "application/json" })
+	public Response generateTemoraryPassword(GenerateTemporaryPasswordRequest request){
+		PersistenceManager persist = null;
+		try{
+			log.info("GenerateTemoraryPassword request for screen Name: " +request.getScreenName());
+    		
+    		persist = PersistenceManagerFactory.getInstance().getPersistenceManager();
+    		persist.beginTransaction();
+    		
+			UserProcessor process = new UserProcessor();
+			process.createTempPassword(request.getScreenName());    		
+			
+			persist.commitTransaction();
+			
+			return Response.status(Response.Status.OK).type(WS_RETURN_TYPE_JSON).build();
+		}catch(NoResultException ex){
+			ex.printStackTrace();
+			return Response.status(Response.Status.NOT_FOUND).type(WS_RETURN_TYPE_JSON).build();
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
+		}finally {
+			if(persist != null){
+				persist.commitTransaction();
+				persist.cleanUp();
+			}
+		}
+	}
+	
+	@POST
+	@Path("/changePassword")
+	@Consumes({ "application/xml", "application/json" })
+	public Response changePassword(ChangePasswordRequest request){
+		PersistenceManager persist = null;
+		try{
+			log.info("changePassword request for screen Name: " +request.getScreenName());
+    		
+    		persist = PersistenceManagerFactory.getInstance().getPersistenceManager();
+    		persist.beginTransaction();
+    		
+			UserProcessor process = new UserProcessor();
+			process.changePassword(request);    		
+			
+			persist.commitTransaction();
+			
+			return Response.status(Response.Status.OK).type(WS_RETURN_TYPE_JSON).build();
+		}catch(NoResultException ex){
+			ex.printStackTrace();
+			return Response.status(Response.Status.NOT_FOUND).type(WS_RETURN_TYPE_JSON).build();
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).type(WS_RETURN_TYPE_JSON).build();
+		}finally {
+			if(persist != null){
+				persist.commitTransaction();
+				persist.cleanUp();
+			}
 		}
 	}
 }

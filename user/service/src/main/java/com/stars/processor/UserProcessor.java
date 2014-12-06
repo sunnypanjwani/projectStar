@@ -2,10 +2,13 @@ package com.stars.processor;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.RandomStringUtils;
+
 import com.stars.exception.InvalidSubscriptionException;
 import com.stars.persistence.dao.*;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
+import com.stars.request_response.ChangePasswordRequest;
 import com.stars.request_response.GetUserResponse;
 import com.stars.request_response.ValidateUserResponse;
 import com.stars.request_response.ValidateUserRequest;
@@ -18,6 +21,7 @@ public class UserProcessor{
 	private static final String PASSWORD_SALT = "salt";
 	private static Logger log = Logger.getLogger(UserProcessor.class.getName());
     private static final String CHANGE_NOT_REQUIRED = "N";
+    private static final String CHANGE_REQUIRED = "Y";
     
     public UserProcessor(){
     }
@@ -51,13 +55,7 @@ public class UserProcessor{
 		user.setFirstName(request.getFirstName());
 		user.setLastName(request.getLastName());
 		user.setEmail(request.getEmail());
-		user.setAddressLine1(request.getAddressLine1());
-		user.setAddressLine2(request.getAddressLine2());
-		user.setAddressLine3(request.getAddressLine3());
-		user.setCity(request.getAddressCity());
-		user.setState(request.getAddressState());
-		user.setCountry(request.getAddressCountry());
-		user.setZip(request.getAddressZip());
+		user.setSex(request.getSex());
 		
 		log.info("Saving user");
 		
@@ -94,13 +92,6 @@ public class UserProcessor{
 		responseObj.setFirstName(user.getFirstName());
 		responseObj.setLastName(user.getLastName());
 		responseObj.setEmail(user.getEmail());
-		responseObj.setAddressLine1(user.getAddressLine1());
-		responseObj.setAddressLine2(user.getAddressLine2());
-		responseObj.setAddressLine3(user.getAddressLine3());
-		responseObj.setAddressCity(user.getCity());
-		responseObj.setAddressState(user.getState());
-		responseObj.setAddressCountry(user.getCountry());
-		responseObj.setAddressZip(user.getZip());
 		
 		return responseObj;
 	}
@@ -129,18 +120,28 @@ public class UserProcessor{
 		return responseObj;
 	}
 
-	public ValidateUserResponse validateUser(ValidateUserRequest request) throws Exception {
+	public ValidateUserResponse validateUser(ValidateUserRequest request){
 		ValidateUserResponse response = new ValidateUserResponse();
 		
-		Users user = Users.loadUserByScreenName(request.getScreenName());
-		log.info("Got user with id: " +user.getUserId());
-		Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
-		log.info("Got password with id: " +password.getPasswordId());
-		String decryptedPassword = getDecryptedPassword(password.getPasswordHash());
-		if(decryptedPassword.equals(request.getPassword())){
-			response.setCode(CODE_OK);
-			response.setMessage(MSG_VALID);
-		}else{
+		try{
+			Users user = Users.loadUserByScreenName(request.getScreenName());
+			log.info("Got user with id: " +user.getUserId());
+			Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
+			log.info("Got password with id: " +password.getPasswordId());
+			String decryptedPassword = getDecryptedPassword(password.getPasswordHash());
+			if(decryptedPassword.equals(request.getPassword())){
+				response.setCode(CODE_OK);
+				response.setMessage(MSG_VALID);
+				if(CHANGE_REQUIRED.equals(password.getChangeRequired())){
+					response.setChangeRequired(true);
+				}else{
+					response.setChangeRequired(false);
+				}
+			}else{
+				response.setCode(CODE_ERR);
+				response.setMessage(MSG_INVALID);
+			}
+		}catch(Exception ex){
 			response.setCode(CODE_ERR);
 			response.setMessage(MSG_INVALID);
 		}
@@ -151,6 +152,36 @@ public class UserProcessor{
 	private String getDecryptedPassword(String passwordHash) {
 		//TODO: Export to password util
 		return passwordHash;
+	}
+
+	public void createTempPassword(String screenName) throws Exception {
+		Users user = Users.loadUserByScreenName(screenName);
+		String temporaryPassword = RandomStringUtils.randomAlphanumeric(10);
+		log.info("Generating temporary password for user as: " +temporaryPassword);
+		
+		Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
+		password.setPasswordHash(temporaryPassword);
+		password.setChangeRequired(CHANGE_REQUIRED);
+		password.save();
+		
+		sendEmailForNewPassword();
+	}
+
+	private void sendEmailForNewPassword() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void changePassword(ChangePasswordRequest request) throws Exception {
+		Users user = Users.loadUserByScreenName(request.getScreenName());
+		
+		Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
+		password.setPasswordHash(request.getPassword());
+		password.setChangeRequired(CHANGE_NOT_REQUIRED);
+		password.save();
+		
+		sendEmailForNewPassword();
+		
 	}
 }
 
