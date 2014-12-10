@@ -13,7 +13,10 @@ import javax.ws.rs.core.Response;
 import com.stars.exception.InvalidSubscriptionException;
 import com.stars.persistence.dbaccess.PersistenceManager;
 import com.stars.persistence.dbaccess.PersistenceManagerFactory;
+import com.stars.processor.StoryProcessor;
 import com.stars.processor.UserProcessor;
+import com.stars.request_response.AddStoryRequest;
+import com.stars.request_response.AddStoryResponse;
 import com.stars.request_response.AddUserRequest;
 import com.stars.request_response.AddUserResponse;
 import com.stars.request_response.ChangePasswordRequest;
@@ -157,6 +160,41 @@ public class UserResource {
 		}
 	}
 	
+	@POST
+	@Path("/addStory")
+	@Consumes({ "application/xml", "application/json" })
+	public Response addStory(AddStoryRequest request) {
+		PersistenceManager persist = null;
+		try {
+			log.info("Got Request for addStory: " + request.marshal());
+
+			persist = PersistenceManagerFactory.getInstance().getPersistenceManager();
+			persist.beginTransaction();
+
+			StoryProcessor process = new StoryProcessor();
+			AddStoryResponse response = process.processAddStoryRequest(request);
+
+			persist.commitTransaction();
+
+			return Response.status(Response.Status.OK).entity(response)
+					.type(WS_RETURN_TYPE_JSON).build();
+		} catch (Exception ex) {
+
+			log.info("Exception occured while processing addStory request. "
+					+ ex.getMessage());
+			if (persist != null) {
+				persist.rollbackTransaction();
+			}
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.type(WS_RETURN_TYPE_JSON).build();
+		} finally {
+			if (persist != null) {
+				persist.commitTransaction();
+				persist.cleanUp();
+			}
+		}
+	}
+
 	@POST
 	@Path("/generateTemporaryPassword")
 	@Consumes({ "application/xml", "application/json" })
