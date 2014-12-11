@@ -35,7 +35,7 @@ public class UserProcessor{
 		user.save();
 		log.info("User Created successfully with userId: " +user.getUserId());
 		createPasswordEntry(user, request);
-		
+		EmailHandler.sendWelcomeEmail(user);
 		response.setMessage("User Created Successfully");
     	
     	return response;
