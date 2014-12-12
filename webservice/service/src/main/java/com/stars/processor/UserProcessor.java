@@ -13,6 +13,8 @@ import com.stars.user.request_response.GetUserResponse;
 import com.stars.user.request_response.ValidateUserResponse;
 import com.stars.user.request_response.ValidateUserRequest;
 import com.stars.utils.EmailHandler;
+import com.stars.utils.PasswordUtils;
+import com.stars.exception.InvalidPasswordException;
 
 public class UserProcessor{
 	private static Logger log = Logger.getLogger(UserProcessor.class.getName());
@@ -45,7 +47,8 @@ public class UserProcessor{
 		log.info("Creating password for user: " +user.getUserId());
 		Passwords password = new Passwords();
 		password.setUser(user);
-		password.setPasswordHash(request.getPassword());
+		String userPassword = PasswordUtils.generatePasswordHash(request.getPassword());
+		password.setPasswordHash(userPassword);
 		password.setPasswordSalt(PASSWORD_SALT);
 		password.setChangeRequired(CHANGE_NOT_REQUIRED);
 		password.save();		
@@ -130,8 +133,9 @@ public class UserProcessor{
 			log.info("Got user with id: " +user.getUserId());
 			Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
 			log.info("Got password with id: " +password.getPasswordId());
-			String decryptedPassword = getDecryptedPassword(password.getPasswordHash());
-			if(decryptedPassword.equals(request.getPassword())){
+			
+			try{
+				PasswordUtils.validatePassword(password.getPasswordHash(), request.getPassword());
 				response.setCode(CODE_OK);
 				response.setMessage(MSG_VALID);
 				if(CHANGE_REQUIRED.equals(password.getChangeRequired())){
@@ -139,7 +143,7 @@ public class UserProcessor{
 				}else{
 					response.setChangeRequired(false);
 				}
-			}else{
+			}catch( InvalidPasswordException ex){
 				response.setCode(CODE_ERR);
 				response.setMessage(MSG_INVALID);
 			}
@@ -151,18 +155,13 @@ public class UserProcessor{
 		return response;
 	}
 
-	private String getDecryptedPassword(String passwordHash) {
-		//TODO: Export to password util
-		return passwordHash;
-	}
-
 	public void createTempPassword(String screenName) throws Exception {
 		Users user = Users.loadUserByScreenName(screenName);
 		String temporaryPassword = RandomStringUtils.randomAlphanumeric(10);
 		log.info("Generating temporary password for user as: " +temporaryPassword);
 		
 		Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
-		password.setPasswordHash(temporaryPassword);
+		password.setPasswordHash(PasswordUtils.generatePasswordHash(temporaryPassword));
 		password.setChangeRequired(CHANGE_REQUIRED);
 		password.save();
 		
@@ -173,12 +172,11 @@ public class UserProcessor{
 		Users user = Users.loadUserByScreenName(request.getScreenName());
 		
 		Passwords password = Passwords.loadPasswordByUserId(user.getUserId());
-		password.setPasswordHash(request.getPassword());
+		password.setPasswordHash(PasswordUtils.generatePasswordHash(request.getPassword()));
 		password.setChangeRequired(CHANGE_NOT_REQUIRED);
 		password.save();
 		
-		EmailHandler.sendEmailForChangedPassword(user);
-		
+		EmailHandler.sendEmailForChangedPassword(user);		
 	}
 }
 
