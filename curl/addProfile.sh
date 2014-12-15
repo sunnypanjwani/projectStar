@@ -1,1 +1,0 @@
-curl  --data "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><AddProfileRequest><userId>10</userId><talentType>singer</talentType><profileName>awesome sunny</profileName></AddProfileRequest>" --header "Content-Type: application/xml"  http://localhost:8080/stars_profile_service-0.0.1/v1/stars/addProfile/

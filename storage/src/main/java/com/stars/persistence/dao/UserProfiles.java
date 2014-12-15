@@ -1,6 +1,7 @@
 package com.stars.persistence.dao;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.Cacheable;
@@ -12,10 +13,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NoResultException;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.Query;
+
+import com.stars.persistence.dbaccess.PersistenceManager;
 import com.stars.persistence.dbaccess.PersistenceManagerFactory;
 
 @Entity
@@ -31,15 +36,16 @@ public class UserProfiles {
 	private Date created;
 	private Date modified;
 
-	public UserProfiles(){}
-	
+	public UserProfiles() {
+	}
+
 	@Id
 	@Column(name = "user_profile_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	public Long getUserProfileId() {
 		return userProfileId;
 	}
-	
+
 	public void setUserProfileId(Long userProfileId) {
 		this.userProfileId = userProfileId;
 	}
@@ -83,11 +89,63 @@ public class UserProfiles {
 	public void setModified(Date modified) {
 		this.modified = modified;
 	}
-	
+
 	public void save() throws Exception {
 
 		this.setModified(new Date());
 		PersistenceManagerFactory.getInstance().getPersistenceManager()
 				.saveOrUpdate(this);
+	}
+
+	public static UserProfiles load(Long usersProfileId) throws Exception {
+
+		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance()
+				.getPersistenceManager();
+
+		Query query = persistMgr
+				.getSession()
+				.createSQLQuery(
+						"select * from user_profiles where user_profile_id = :usersProfileId")
+				.addEntity(UserProfiles.class);
+		query.setParameter("usersProfileId", usersProfileId);
+		logger.info("Executing Query : " + query.getQueryString());
+
+		@SuppressWarnings("unchecked")
+		List<UserProfiles> list = query.list();
+
+		if (list == null || list.size() != 1) {
+
+			throw new NoResultException(
+					"No result or more than one result found for userProfileId:"
+							+ usersProfileId);
+		}
+
+		return list.get(0);
+	}
+
+	public static List<UserProfiles> loadWithUserId(Long userId)
+			throws Exception {
+
+		PersistenceManager persistMgr = PersistenceManagerFactory.getInstance()
+				.getPersistenceManager();
+
+		Query query = persistMgr
+				.getSession()
+				.createSQLQuery(
+						"select * from user_profiles where users_user_id = :userId")
+				.addEntity(UserProfiles.class);
+		query.setParameter("userId", userId);
+		logger.info("Executing Query : " + query.getQueryString());
+
+		@SuppressWarnings("unchecked")
+		List<UserProfiles> list = query.list();
+
+		if (list == null) {
+
+			throw new NoResultException("No result found for userProfileId:"
+					+ userId);
+		}
+
+		return list;
 	}
 }

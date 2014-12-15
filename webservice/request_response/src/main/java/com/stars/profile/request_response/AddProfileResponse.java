@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "AddProfileResponse")
 public class AddProfileResponse {
-	
+
 	private String message;
 
 	@XmlElement(name = "message")
@@ -16,5 +16,4 @@ public class AddProfileResponse {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-
 }

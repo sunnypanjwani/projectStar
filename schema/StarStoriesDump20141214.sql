@@ -109,6 +109,7 @@ CREATE TABLE `profiles` (
   `profile_id` int(11) NOT NULL AUTO_INCREMENT,
   `talents_talent_id` int(11) DEFAULT NULL,
   `name` varchar(30) NOT NULL,
+   `status` varchar(15) NOT NULL DEFAULT "ACTIVE",
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`profile_id`),
